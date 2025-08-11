@@ -1,38 +1,36 @@
   
-#mampiasa VirtualBox
-provider "vagrant" {
-  # rien à configurer, Vagrant utilise VirtualBox automatiquement
-}
-
-resource "vagrant_vm" "vm1" {
-  name = "vm-terraform-local"
-  box  = "ubuntu/bionic64"
-  memory = 1024
-  cpus   = 1
-}
-
-#raha mampiasa docker
 terraform {
   required_providers {
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 3.0.2"
+    hcloud = {
+      source  = "hetznercloud/hcloud"
+      version = "~> 1.37"   # ou la dernière version stable
     }
   }
 }
 
-provider "docker" {}
-
-resource "docker_image" "nginx" {
-  name = "nginx:latest"
+provider "hcloud" {
+  token = var.hcloud_token
 }
 
-resource "docker_container" "nginx" {
-  name  = "nginx_server"
-  image = docker_image.nginx.latest
-  ports {
-    internal = 80
-    external = 8080
+resource "hcloud_ssh_key" "default" {
+  name       = "my-ssh-key"
+  public_key = file(var.ssh_key_path)
+}
+
+data "template_file" "cloudinit" {
+  template = file("${path.module}/cloud-init.yaml")
+
+  vars = {
+    ssh_key = file(var.ssh_key_path)
   }
+}
+
+resource "hcloud_server" "web" {
+  name        = var.server_name
+  image       = "ubuntu-22.04"
+  server_type = "cpx11"
+  location    = "nbg1"
+  ssh_keys    = [hcloud_ssh_key.default.id]
+  user_data = file("${path.module}/cloud-init.yaml")
 }
 
