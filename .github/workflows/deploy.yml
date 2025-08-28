@@ -1,0 +1,38 @@
+name: Deploy to Hetzner
+
+# Déclencheur : à chaque push sur la branche main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Étape 1 : récupérer le code du dépôt
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Étape 2 : configurer la clé SSH
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SRVTEST_IP }} >> ~/.ssh/known_hosts
+
+    # Étape 3 : tester la connexion SSH
+    - name: Test SSH connection
+      run: ssh -i ~/.ssh/id_rsa ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "ls -la"
+
+    # Étape 4 : déployer l'application
+    - name: Deploy application
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "
+          cd /chemin/du/projet &&
+          git pull origin main &&
+          # ici tu peux ajouter les commandes de build et restart
+          echo 'Déploiement terminé'
+        "
