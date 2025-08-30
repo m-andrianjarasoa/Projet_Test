@@ -31,9 +31,11 @@ jobs:
     # Étape 4 : déployer l'application
     - name: Deploy application
       run: |
-        ssh -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} bash -s <<'ENDSSH'
+        SSH_USER=${{ secrets.SRVTEST_USER }}
+        SSH_HOST=${{ secrets.SRVTEST_IP }}
+        ssh -i ~/.ssh/id_ed25519 $SSH_USER@$SSH_HOST bash -s <<'ENDSSH'
           set -e
-          DIR="/home/${{ secrets.SRVTEST_USER }}/Projet_Test"
+          DIR="/home/$SSH_USER/Projet_Test"
           if [ ! -d "$DIR/.git" ]; then
             git clone git@github.com:m-andrianjarasoa/Projet_Test.git "$DIR"
           else
