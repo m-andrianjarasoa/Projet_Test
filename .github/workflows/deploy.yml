@@ -1,6 +1,5 @@
 name: Deploy to Hetzner
 
-# Déclencheur : à chaque push sur la branche main
 on:
   push:
     branches:
@@ -15,7 +14,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Étape 2 : configurer la clé SSH
+    # Étape 2 : configurer la clé SSH pour accéder au serveur
     - name: Setup SSH
       run: |
         mkdir -p ~/.ssh
@@ -25,22 +24,31 @@ jobs:
 
     # Étape 3 : tester la connexion SSH
     - name: Test SSH connection
-      run: ssh -vvv -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "ls -la"
+      run: ssh -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "ls -la"
 
-
-    # Étape 4 : déployer l'application
+    # Étape 4 : déployer l'application avec HTTPS + token
     - name: Deploy application
+      env:
+        GITHUB_TOKEN_DEPLOY: ${{ secrets.TOKEN_DEPLOY }}
+        SSH_USER: ${{ secrets.SRVTEST_USER }}
+        SSH_HOST: ${{ secrets.SRVTEST_IP }}
       run: |
-        SSH_USER=${{ secrets.SRVTEST_USER }}
-        SSH_HOST=${{ secrets.SRVTEST_IP }}
         ssh -i ~/.ssh/id_ed25519 $SSH_USER@$SSH_HOST bash -s <<'ENDSSH'
           set -e
           DIR="/home/$SSH_USER/Projet_Test"
+
+          # Créer le dossier si inexistant
+          mkdir -p "$DIR"
+
+          # Cloner le dépôt si il n'existe pas, sinon pull
           if [ ! -d "$DIR/.git" ]; then
-            git clone git@github.com:m-andrianjarasoa/Projet_Test.git "$DIR"
+            git clone https://$GITHUB_TOKEN_DEPLOY@github.com/m-andrianjarasoa/Projet_Test.git "$DIR"
           else
             cd "$DIR"
             git pull origin main
           fi
+
+          echo "Déploiement terminé"
         ENDSSH
+
 
