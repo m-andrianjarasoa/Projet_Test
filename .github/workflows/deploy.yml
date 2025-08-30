@@ -32,7 +32,8 @@ jobs:
     - name: Deploy application
       run: |
         ssh -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "
-          cd /chemin/du/projet &&
+          mkdir -p /home/${{ secrets.SRVTEST_USER }}/Projet_Test &&
+          cd /home/${{ secrets.SRVTEST_USER }}/Projet_Test &&
           git pull origin main &&
           # ici tu peux ajouter les commandes de build et restart
           echo 'Déploiement terminé'
