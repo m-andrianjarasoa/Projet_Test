@@ -31,12 +31,14 @@ jobs:
     # Étape 4 : déployer l'application
     - name: Deploy application
       run: |
-        ssh -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "
-          mkdir -p /home/${{ secrets.SRVTEST_USER }}/Projet_Test &&
-          cd /home/${{ secrets.SRVTEST_USER }}/Projet_Test &&
-          if [ ! -d "/home/nantenaina/Projet_Test/.git" ]; then
-            git clone git@github.com:TonUtilisateur/TonDepot.git /home/nantenaina/Projet_Test
+        ssh -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} bash -s <<'ENDSSH'
+          set -e
+          DIR="/home/${{ secrets.SRVTEST_USER }}/Projet_Test"
+          if [ ! -d "$DIR/.git" ]; then
+            git clone git@github.com:m-andrianjarasoa/Projet_Test.git "$DIR"
           else
-            cd /home/nantenaina/Projet_Test
+            cd "$DIR"
             git pull origin main
           fi
+        ENDSSH
+
