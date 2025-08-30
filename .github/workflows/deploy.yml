@@ -34,7 +34,9 @@ jobs:
         ssh -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "
           mkdir -p /home/${{ secrets.SRVTEST_USER }}/Projet_Test &&
           cd /home/${{ secrets.SRVTEST_USER }}/Projet_Test &&
-          git pull origin main &&
-          # ici tu peux ajouter les commandes de build et restart
-          echo 'Déploiement terminé'
-        "
+          if [ ! -d "/home/nantenaina/Projet_Test/.git" ]; then
+            git clone git@github.com:TonUtilisateur/TonDepot.git /home/nantenaina/Projet_Test
+          else
+            cd /home/nantenaina/Projet_Test
+            git pull origin main
+          fi
