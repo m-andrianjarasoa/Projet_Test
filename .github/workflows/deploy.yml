@@ -25,7 +25,8 @@ jobs:
 
     # Étape 3 : tester la connexion SSH
     - name: Test SSH connection
-      run: ssh -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "ls -la"
+      run: ssh -vvv -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "ls -la"
+
 
     # Étape 4 : déployer l'application
     - name: Deploy application
