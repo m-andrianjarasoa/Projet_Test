@@ -19,18 +19,18 @@ jobs:
     - name: Setup SSH
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+        echo "${{ secrets.DEPLOY_KEY }}" | tr -d '\r' > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan -H ${{ secrets.SRVTEST_IP }} >> ~/.ssh/known_hosts
 
     # Étape 3 : tester la connexion SSH
     - name: Test SSH connection
-      run: ssh -i ~/.ssh/id_rsa ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "ls -la"
+      run: ssh -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "ls -la"
 
     # Étape 4 : déployer l'application
     - name: Deploy application
       run: |
-        ssh -i ~/.ssh/id_rsa ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "
+        ssh -i ~/.ssh/id_ed25519 ${{ secrets.SRVTEST_USER }}@${{ secrets.SRVTEST_IP }} "
           cd /chemin/du/projet &&
           git pull origin main &&
           # ici tu peux ajouter les commandes de build et restart
